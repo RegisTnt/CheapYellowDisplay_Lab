@@ -1,0 +1,10 @@
+{
+    "name": "CYDUI",
+    "version": "0.1.0",
+    "description": "Simple reusable UI components for the Cheap Yellow Display",
+    "frameworks": "arduino",
+    "platforms": "espressif32",
+    "dependencies": {
+        "bodmer/TFT_eSPI": "^2.5.43"
+    }
+}

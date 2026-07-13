@@ -7,6 +7,7 @@ Ce dépôt rassemble des laboratoires progressifs autour de la carte **ESP32-243
 - `01_Hello_world` valide la chaîne PlatformIO, le port série et un premier affichage sur le CYD.
 - `02_Hello_Display` propose une étape d'affichage simple et indépendante.
 - `02_Graphics` présente progressivement les primitives graphiques de TFT_eSPI.
+- `04_UI_Components` introduit un premier composant graphique orienté objet et la bibliothèque locale CYDUI.
 
 ## Matériel et outils
 

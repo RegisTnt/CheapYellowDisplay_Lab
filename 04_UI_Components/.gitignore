@@ -1,0 +1,29 @@
+# PlatformIO et fichiers de compilation
+.pio/
+*.o
+*.obj
+*.elf
+*.bin
+*.hex
+*.map
+
+# Caches IntelliSense et fichiers locaux VS Code
+.vscode/*
+!.vscode/extensions.json
+*.code-workspace
+*.VC.db
+*.VC.db-shm
+*.VC.db-wal
+
+# Fichiers temporaires et journaux
+*.log
+*.tmp
+*.temp
+*.bak
+*~
+
+# Fichiers système Windows et macOS
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
