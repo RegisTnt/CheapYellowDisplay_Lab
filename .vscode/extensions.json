@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "platformio.platformio-ide",
+        "ms-vscode.cpptools",
+        "eamodio.gitlens",
+        "usernamehw.errorlens",
+        "aaron-bond.better-comments",
+        "yzhang.markdown-all-in-one"
+    ]
+}
