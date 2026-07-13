@@ -2,6 +2,12 @@
 
 Ce dépôt rassemble des laboratoires progressifs autour de la carte **ESP32-2432S028**, couramment appelée **Cheap Yellow Display** ou **CYD**. Le premier projet valide toute la chaîne minimale : compilation PlatformIO, téléversement USB, communication série, configuration matérielle TFT et affichage d'un Hello World.
 
+## Projets disponibles
+
+- `01_Hello_world` valide la chaîne PlatformIO, le port série et un premier affichage sur le CYD.
+- `02_Hello_Display` propose une étape d'affichage simple et indépendante.
+- `02_Graphics` présente progressivement les primitives graphiques de TFT_eSPI.
+
 ## Matériel et outils
 
 - une carte ESP32-2432S028 avec son câble USB de données ;
