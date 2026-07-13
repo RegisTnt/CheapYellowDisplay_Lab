@@ -1,0 +1,8 @@
+{
+    "name": "CYDTouch",
+    "version": "0.1.0",
+    "description": "Raw XPT2046 touch input and screen coordinate mapping for the CYD",
+    "frameworks": "arduino",
+    "platforms": "espressif32",
+    "headers": "TouchController.h"
+}
