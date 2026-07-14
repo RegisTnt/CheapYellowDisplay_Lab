@@ -23,6 +23,7 @@ constexpr int16_t TOUCH_RAW_MAX_Y = 3800;
 
 constexpr uint32_t TOUCH_READ_INTERVAL_MS = 30;
 constexpr uint32_t MIN_CLICK_INTERVAL_MS = 250;
+constexpr uint32_t CONFIRMATION_DURATION_MS = 220;
 
 TFT_eSPI tft;
 SPIClass touchSpi(HSPI);
@@ -35,13 +36,12 @@ CYDUI::Button settingsButton(70, 130, 180, 48, "PARAMETRES");
 struct ButtonBinding
 {
     CYDUI::Button* button;
-    const char* name;
 };
 
 ButtonBinding buttons[] = {
-    {&openButton, "OUVRIR"},
-    {&pedestrianButton, "PIETON"},
-    {&settingsButton, "PARAMETRES"}
+    {&openButton},
+    {&pedestrianButton},
+    {&settingsButton}
 };
 
 bool touchReady = false;
@@ -94,7 +94,7 @@ void drawInterface()
 void showButtonStatus(const char* prefix, const ButtonBinding& binding)
 {
     char status[32];
-    snprintf(status, sizeof(status), "%s : %s", prefix, binding.name);
+    snprintf(status, sizeof(status), "%s : %s", prefix, binding.button->text());
     setStatus(status);
 }
 
@@ -146,10 +146,11 @@ void loop()
 {
     static uint32_t lastReadTime = 0;
     static uint32_t lastClickTime = 0;
+    static uint32_t confirmationStartTime = 0;
     static bool previousTouched = false;
-    static bool gestureCancelled = false;
     static CYDTouch::TouchPoint previousPoint = {0, 0, 0, 0, 0, false};
     static ButtonBinding* capturedButton = nullptr;
+    static ButtonBinding* confirmedButton = nullptr;
 
     if (!touchReady)
     {
@@ -157,6 +158,14 @@ void loop()
     }
 
     const uint32_t now = millis();
+
+    if (confirmedButton != nullptr
+        && now - confirmationStartTime >= CONFIRMATION_DURATION_MS)
+    {
+        setButtonState(*confirmedButton, CYDUI::ButtonState::Normal);
+        confirmedButton = nullptr;
+    }
+
     if (now - lastReadTime < TOUCH_READ_INTERVAL_MS)
     {
         return;
@@ -168,28 +177,45 @@ void loop()
 
     if (point.touched && !previousTouched)
     {
+        Serial.printf("Touch DOWN x=%d y=%d\n", point.x, point.y);
+
+        if (confirmedButton != nullptr)
+        {
+            setButtonState(*confirmedButton, CYDUI::ButtonState::Normal);
+            confirmedButton = nullptr;
+        }
+
         capturedButton = buttonAt(point.x, point.y);
-        gestureCancelled = false;
         if (capturedButton != nullptr)
+        {
+            setButtonState(*capturedButton, CYDUI::ButtonState::Pressed);
+            showButtonStatus("Appui", *capturedButton);
+            Serial.print("Button pressed: ");
+            Serial.println(capturedButton->button->text());
+        }
+    }
+    else if (point.touched && previousTouched && capturedButton != nullptr)
+    {
+        const bool insideCapturedButton = capturedButton->button->contains(point.x, point.y);
+        if (!insideCapturedButton
+            && capturedButton->button->state() == CYDUI::ButtonState::Pressed)
+        {
+            setButtonState(*capturedButton, CYDUI::ButtonState::Normal);
+            setStatus("Appui annule");
+        }
+        else if (insideCapturedButton
+            && capturedButton->button->state() == CYDUI::ButtonState::Normal)
         {
             setButtonState(*capturedButton, CYDUI::ButtonState::Pressed);
             showButtonStatus("Appui", *capturedButton);
         }
     }
-    else if (point.touched && previousTouched && capturedButton != nullptr)
-    {
-        if (!capturedButton->button->contains(point.x, point.y) && !gestureCancelled)
-        {
-            gestureCancelled = true;
-            setButtonState(*capturedButton, CYDUI::ButtonState::Normal);
-            showButtonStatus("Annule", *capturedButton);
-        }
-    }
     else if (!point.touched && previousTouched)
     {
+        Serial.printf("Touch UP x=%d y=%d\n", previousPoint.x, previousPoint.y);
+
         if (capturedButton != nullptr)
         {
-            setButtonState(*capturedButton, CYDUI::ButtonState::Normal);
             const bool releasedInside = capturedButton->button->contains(
                 previousPoint.x,
                 previousPoint.y
@@ -197,20 +223,20 @@ void loop()
             const bool debounceElapsed = lastClickTime == 0
                 || now - lastClickTime >= MIN_CLICK_INTERVAL_MS;
 
-            if (!gestureCancelled && releasedInside && debounceElapsed)
+            if (releasedInside && debounceElapsed)
             {
                 lastClickTime = now;
+                confirmationStartTime = now;
+                confirmedButton = capturedButton;
+                setButtonState(*capturedButton, CYDUI::ButtonState::Confirmed);
                 showButtonStatus("Clic", *capturedButton);
                 Serial.print("Button clicked: ");
-                Serial.println(capturedButton->name);
+                Serial.println(capturedButton->button->text());
             }
-            else if (!gestureCancelled && !releasedInside)
+            else
             {
-                showButtonStatus("Annule", *capturedButton);
-            }
-            else if (!gestureCancelled)
-            {
-                setStatus("Aucun bouton");
+                setButtonState(*capturedButton, CYDUI::ButtonState::Normal);
+                setStatus(releasedInside ? "Aucun bouton" : "Appui annule");
             }
         }
         else
@@ -219,7 +245,6 @@ void loop()
         }
 
         capturedButton = nullptr;
-        gestureCancelled = false;
     }
 
     previousTouched = point.touched;

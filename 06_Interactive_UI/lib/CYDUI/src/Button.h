@@ -12,6 +12,7 @@ enum class ButtonState
 {
     Normal,
     Pressed,
+    Confirmed,
     Disabled
 };
 
@@ -60,6 +61,9 @@ public:
 
     /** @brief Indique si le bouton accepte les tests de zone. */
     bool isEnabled() const;
+
+    /** @brief Retourne le libellé conservé par le bouton. */
+    const char* text() const;
 
 private:
     int16_t x_;

@@ -11,6 +11,7 @@ struct ButtonStyle
     uint16_t background;
     uint16_t border;
     uint16_t text;
+    int16_t inset;
     int16_t textOffset;
 };
 
@@ -19,12 +20,14 @@ ButtonStyle styleFor(ButtonState state)
     switch (state)
     {
         case ButtonState::Pressed:
-            return {TFT_CYAN, TFT_WHITE, TFT_NAVY, 1};
+            return {TFT_CYAN, TFT_WHITE, TFT_NAVY, 2, 2};
+        case ButtonState::Confirmed:
+            return {TFT_DARKGREEN, TFT_WHITE, TFT_WHITE, 0, 0};
         case ButtonState::Disabled:
-            return {TFT_DARKGREY, TFT_LIGHTGREY, TFT_LIGHTGREY, 0};
+            return {TFT_DARKGREY, TFT_LIGHTGREY, TFT_LIGHTGREY, 0, 0};
         case ButtonState::Normal:
         default:
-            return {TFT_NAVY, TFT_CYAN, TFT_WHITE, 0};
+            return {TFT_NAVY, TFT_CYAN, TFT_WHITE, 0, 0};
     }
 }
 
@@ -49,15 +52,21 @@ Button::Button(
 void Button::draw(TFT_eSPI& display) const
 {
     const ButtonStyle style = styleFor(state_);
-    const int16_t radius = height_ / 6;
-    const int16_t centerX = x_ + width_ / 2 + style.textOffset;
-    const int16_t centerY = y_ + height_ / 2 + style.textOffset;
+    const int16_t drawX = x_ + style.inset;
+    const int16_t drawY = y_ + style.inset;
+    const int16_t drawWidth = width_ - 2 * style.inset;
+    const int16_t drawHeight = height_ - 2 * style.inset;
+    const int16_t radius = drawHeight / 6;
+    const int16_t centerX = drawX + drawWidth / 2 + style.textOffset;
+    const int16_t centerY = drawY + drawHeight / 2 + style.textOffset;
     const uint8_t previousDatum = display.getTextDatum();
     const uint16_t previousTextColor = static_cast<uint16_t>(display.textcolor);
     const uint16_t previousBackgroundColor = static_cast<uint16_t>(display.textbgcolor);
 
-    display.fillRoundRect(x_, y_, width_, height_, radius, style.background);
-    display.drawRoundRect(x_, y_, width_, height_, radius, style.border);
+    // Nettoie toute la géométrie normale avant de dessiner un état réduit.
+    display.fillRect(x_, y_, width_, height_, TFT_BLACK);
+    display.fillRoundRect(drawX, drawY, drawWidth, drawHeight, radius, style.background);
+    display.drawRoundRect(drawX, drawY, drawWidth, drawHeight, radius, style.border);
     display.setTextDatum(MC_DATUM);
     display.setTextColor(style.text, style.background);
     display.drawString(text_ != nullptr ? text_ : "", centerX, centerY, 2);
@@ -97,6 +106,11 @@ void Button::setEnabled(bool enabled)
 bool Button::isEnabled() const
 {
     return state_ != ButtonState::Disabled;
+}
+
+const char* Button::text() const
+{
+    return text_ != nullptr ? text_ : "";
 }
 
 }  // namespace CYDUI

@@ -28,18 +28,28 @@ CYDUI::Button
 
 CYDTouch ne connaît pas l'affichage. CYDUI ne connaît pas le tactile. Seul `main.cpp` relie les deux bibliothèques et décide si un geste constitue un clic.
 
-## API Button 0.2.0
+## API Button 0.3.0
 
 - `draw(display)` dessine le bouton selon son état ;
 - `contains(x, y)` vérifie si un point est dans ses limites et retourne `false` s'il est désactivé ;
 - `setState(state)` et `state()` modifient ou lisent l'état ;
-- `setEnabled(enabled)` et `isEnabled()` désactivent ou réactivent le bouton.
+- `setEnabled(enabled)` et `isEnabled()` désactivent ou réactivent le bouton ;
+- `text()` retourne son libellé constant.
 
 ## Scénario de clic
 
-Au premier contact dans un bouton, l'application capture ce bouton et le dessine en état `Pressed`. Tant que le contact reste à l'intérieur, le bouton demeure pressé. Une sortie de sa zone annule définitivement le geste et restaure l'état `Normal`. Au relâchement, un clic est déclaré uniquement si le même bouton est encore capturé, si le geste n'a pas été annulé et si la dernière position tactile se trouve dans sa zone.
+Au premier contact dans un bouton, l'application capture ce bouton et le dessine en état `Pressed`. Une sortie de sa zone restaure l'état `Normal` et affiche `Appui annule`. Si le contact revient dans le même bouton avant le relâchement, l'état `Pressed` est restauré. Au relâchement, un clic est déclaré uniquement si la dernière position tactile se trouve dans le bouton capturé.
 
 Le maintien ne crée pas de clic supplémentaire : la validation se produit uniquement lors de la transition contact vers relâchement. Un intervalle minimal de **250 ms** entre deux clics filtre les rebonds rapides.
+
+## Animations et retour visuel
+
+- `Normal` utilise un fond bleu foncé, une bordure cyan et un texte blanc.
+- `Pressed` utilise un fond cyan et une bordure blanche. Sa géométrie est réduite de deux pixels sur chaque côté et son texte est légèrement décalé pour créer un effet d'enfoncement.
+- `Confirmed` utilise un fond vert et reste affiché pendant **220 ms** avant le retour automatique à `Normal`.
+- `Disabled` utilise des gris et refuse les tests `contains()`.
+
+La confirmation est pilotée par `millis()` sans attente bloquante. Seul le bouton dont l'état change est redessiné, et la zone de statut n'est actualisée que si son texte change. La sortie de zone restaure immédiatement le bouton ; un retour avant relâchement réactive l'effet pressé.
 
 ## Résultat attendu
 
@@ -61,9 +71,11 @@ Le moniteur série utilise 115 200 bauds.
 
 1. Toucher `OUVRIR` et vérifier son changement visuel.
 2. Relâcher sur `OUVRIR` et vérifier le message série.
-3. Toucher `OUVRIR`, glisser hors de sa zone et vérifier qu'aucun clic n'est déclaré.
-4. Maintenir le contact, puis relâcher et vérifier qu'un seul clic est généré.
-5. Refaire le test avec `PIETON` puis `PARAMETRES`.
+3. Vérifier le flash vert de confirmation puis le retour automatique à l'état normal.
+4. Toucher `OUVRIR`, glisser hors de sa zone et vérifier l'annulation si le relâchement reste extérieur.
+5. Revenir dans le bouton avant de relâcher et vérifier que l'état pressé revient.
+6. Maintenir le contact, puis relâcher et vérifier qu'un seul clic est généré.
+7. Refaire le test avec `PIETON` puis `PARAMETRES`.
 
 ## Dépannage
 
