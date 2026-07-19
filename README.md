@@ -10,6 +10,7 @@ Ce dépôt rassemble des laboratoires progressifs autour de la carte **ESP32-243
 - `04_UI_Components` introduit un premier composant graphique orienté objet et la bibliothèque locale CYDUI.
 - `05_Touch_Input` assure la lecture, la calibration et la visualisation des coordonnées tactiles du contrôleur XPT2046.
 - `06_Interactive_UI` propose des boutons tactiles interactifs avec états visuels et détection de clic sans logique métier.
+- `07_Toulon_Weather` affiche la météo de Toulon, les prévisions, le Soleil et la phase de la Lune dans un tableau de bord méditerranéen.
 
 ## Matériel et outils
 

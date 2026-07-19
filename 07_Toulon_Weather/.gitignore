@@ -1,0 +1,28 @@
+# PlatformIO
+.pio/
+
+# Configuration locale contenant les identifiants Wi-Fi
+include/config.h
+
+# VS Code / IntelliSense
+.vscode/*
+!.vscode/extensions.json
+*.code-workspace
+*.VC.db*
+
+# Fichiers de compilation, temporaires et journaux
+*.o
+*.obj
+*.elf
+*.bin
+*.hex
+*.map
+*.log
+*.tmp
+*.bak
+*~
+
+# Système
+.DS_Store
+Thumbs.db
+Desktop.ini
