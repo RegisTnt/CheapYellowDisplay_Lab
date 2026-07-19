@@ -1,0 +1,14 @@
+.pio/
+include/ToulonHomeConfig.h
+.vscode/*
+!.vscode/extensions.json
+*.code-workspace
+*.bin
+*.elf
+*.map
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+Desktop.ini

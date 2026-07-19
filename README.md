@@ -11,6 +11,7 @@ Ce dépôt rassemble des laboratoires progressifs autour de la carte **ESP32-243
 - `05_Touch_Input` assure la lecture, la calibration et la visualisation des coordonnées tactiles du contrôleur XPT2046.
 - `06_Interactive_UI` propose des boutons tactiles interactifs avec états visuels et détection de clic sans logique métier.
 - `07_Toulon_Weather` affiche la météo de Toulon, les prévisions, le Soleil et la phase de la Lune dans un tableau de bord méditerranéen.
+- `08_CYD_ToulonHome` réunit météo, heure, Lune et télécommande Wi-Fi du portail sur une page tactile fluide.
 
 ## Matériel et outils
 
