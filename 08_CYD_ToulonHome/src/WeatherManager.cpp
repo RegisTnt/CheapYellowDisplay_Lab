@@ -120,6 +120,7 @@ void WeatherManager::fetchInBackground()
         parsed.updatedAt = time(nullptr);
         parsed.revision = current.revision + 1;
         publish(parsed);
+        Serial.printf("Meteo recue: %.1f C.\n", parsed.temperature);
         nextFetchMs_ = millis() + REFRESH_INTERVAL_MS;
     }
     else
@@ -129,6 +130,7 @@ void WeatherManager::fetchInBackground()
         current.stale = current.valid;
         ++current.revision;
         publish(current);
+        Serial.println("Meteo indisponible, derniere valeur conservee.");
         nextFetchMs_ = millis() + RETRY_INTERVAL_MS;
     }
     taskRunning_ = false;

@@ -60,10 +60,12 @@ ThemePalette transitionTo = {};
 void configureOta()
 {
     if (IS_DEMO || otaStarted) return;
+#ifdef OTA_PASSWORD
     ArduinoOTA.setHostname("cyd-toulonhome");
     ArduinoOTA.setPassword(OTA_PASSWORD);
     ArduinoOTA.begin();
     otaStarted = true;
+#endif
 }
 
 void refreshMoon(time_t now)

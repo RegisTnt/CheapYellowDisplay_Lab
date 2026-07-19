@@ -58,6 +58,7 @@ WifiSnapshot WifiManager::snapshot() const
 
 void WifiManager::publish(bool connected, bool connecting, int32_t rssi)
 {
+    const bool connectionChanged = snapshot_.connected != connected;
     if (snapshot_.connected == connected
         && snapshot_.connecting == connecting
         && snapshot_.rssi == rssi)
@@ -68,4 +69,16 @@ void WifiManager::publish(bool connected, bool connecting, int32_t rssi)
     snapshot_.connecting = connecting;
     snapshot_.rssi = rssi;
     ++snapshot_.revision;
+    if (!demoMode_ && connectionChanged)
+    {
+        if (connected)
+        {
+            Serial.printf("Wi-Fi connecte, IP=%s, RSSI=%ld dBm\n",
+                WiFi.localIP().toString().c_str(), static_cast<long>(rssi));
+        }
+        else
+        {
+            Serial.println("Wi-Fi deconnecte.");
+        }
+    }
 }

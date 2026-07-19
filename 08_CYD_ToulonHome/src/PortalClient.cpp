@@ -200,9 +200,16 @@ void PortalClient::execute()
 
     if (stateSuccess)
     {
+        const bool stateChanged = !value.apiOnline || value.position != position;
         consecutiveFailures_ = 0;
         value.apiOnline = true;
         value.position = position;
+        if (stateChanged)
+        {
+            Serial.println(position == PortalPosition::Closed
+                ? "Portail: ferme confirme."
+                : "Portail: ouvert.");
+        }
         value.updatedAt = taskTime_ != 0 ? taskTime_ : time(nullptr);
         if (position == PortalPosition::Open)
         {
@@ -216,6 +223,10 @@ void PortalClient::execute()
     else
     {
         ++consecutiveFailures_;
+        if (consecutiveFailures_ <= 2)
+        {
+            Serial.println("PortailControl: lecture /etat impossible.");
+        }
         if (consecutiveFailures_ >= 2) value.apiOnline = false;
     }
 

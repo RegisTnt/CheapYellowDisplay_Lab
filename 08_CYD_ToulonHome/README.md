@@ -86,7 +86,7 @@ Copier `include/config.example.h` vers `include/ToulonHomeConfig.h` :
 #define WIFI_SSID "MonReseau"
 #define WIFI_PASSWORD "MonMotDePasse"
 #define PORTAL_BASE_URL "http://portail.local"
-#define OTA_PASSWORD "mot-de-passe-local"
+#define OTA_PASSWORD "mot-de-passe-local" // facultatif, active l'OTA
 ```
 
 Supprimer ou commenter `#define DEMO_MODE` pour activer les appels réels. `ToulonHomeConfig.h` est ignoré par Git.
@@ -124,7 +124,7 @@ $env:CYD_OTA_PASSWORD = "mot-de-passe-local"
 pio run -e esp32dev_ota --target upload
 ```
 
-La cible mDNS est `cyd-toulonhome.local`. L'OTA n'est initialisé qu'en mode réel.
+La cible mDNS est `cyd-toulonhome.local`. L'OTA n'est initialisé qu'en mode réel et uniquement si `OTA_PASSWORD` est défini.
 
 ## Bibliothèques
 
