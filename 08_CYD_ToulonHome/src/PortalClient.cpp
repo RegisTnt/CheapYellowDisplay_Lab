@@ -98,6 +98,7 @@ bool PortalClient::canSend(uint32_t nowMs) const
 {
     const PortalSnapshot value = snapshot();
     return value.apiOnline
+        && !taskRunning_
         && !value.busy
         && static_cast<int32_t>(nowMs - cooldownUntilMs_) >= 0;
 }
@@ -151,24 +152,30 @@ bool PortalClient::start(Action action, uint32_t nowMs)
     taskRunning_ = true;
 
     PortalSnapshot value = snapshot();
-    value.busy = true;
-    value.feedback = CommandFeedback::None;
-    ++value.revision;
-    if (xSemaphoreTake(mutex_, pdMS_TO_TICKS(20)) == pdTRUE)
+    if (action != Action::ReadState)
     {
-        snapshot_ = value;
-        xSemaphoreGive(mutex_);
-    }
-
-    if (xTaskCreatePinnedToCore(taskEntry, "portal-http", 7168, this, 2, nullptr, 0) != pdPASS)
-    {
-        taskRunning_ = false;
-        value.busy = false;
+        value.busy = true;
+        value.feedback = CommandFeedback::None;
         ++value.revision;
         if (xSemaphoreTake(mutex_, pdMS_TO_TICKS(20)) == pdTRUE)
         {
             snapshot_ = value;
             xSemaphoreGive(mutex_);
+        }
+    }
+
+    if (xTaskCreatePinnedToCore(taskEntry, "portal-http", 7168, this, 2, nullptr, 0) != pdPASS)
+    {
+        taskRunning_ = false;
+        if (action != Action::ReadState)
+        {
+            value.busy = false;
+            ++value.revision;
+            if (xSemaphoreTake(mutex_, pdMS_TO_TICKS(20)) == pdTRUE)
+            {
+                snapshot_ = value;
+                xSemaphoreGive(mutex_);
+            }
         }
         return false;
     }
@@ -191,11 +198,13 @@ void PortalClient::execute()
     const bool stateSuccess = readState(position, stateStatus);
 
     PortalSnapshot value = snapshot();
-    value.busy = false;
-    value.cooldown = static_cast<int32_t>(cooldownUntilMs_ - millis()) > 0;
+    bool visibleChanged = false;
     if (action != Action::ReadState)
     {
+        value.busy = false;
+        value.cooldown = static_cast<int32_t>(cooldownUntilMs_ - millis()) > 0;
         value.feedback = commandAccepted ? CommandFeedback::Sent : CommandFeedback::Failed;
+        visibleChanged = true;
     }
 
     if (stateSuccess)
@@ -204,6 +213,7 @@ void PortalClient::execute()
         consecutiveFailures_ = 0;
         value.apiOnline = true;
         value.position = position;
+        visibleChanged = visibleChanged || stateChanged;
         if (stateChanged)
         {
             Serial.println(position == PortalPosition::Closed
@@ -213,10 +223,15 @@ void PortalClient::execute()
         value.updatedAt = taskTime_ != 0 ? taskTime_ : time(nullptr);
         if (position == PortalPosition::Open)
         {
-            if (value.openSinceMs == 0) value.openSinceMs = millis();
+            if (value.openSinceMs == 0)
+            {
+                value.openSinceMs = millis();
+                visibleChanged = true;
+            }
         }
         else
         {
+            visibleChanged = visibleChanged || value.openSinceMs != 0;
             value.openSinceMs = 0;
         }
     }
@@ -227,10 +242,14 @@ void PortalClient::execute()
         {
             Serial.println("PortailControl: lecture /etat impossible.");
         }
-        if (consecutiveFailures_ >= 2) value.apiOnline = false;
+        if (consecutiveFailures_ >= 2 && value.apiOnline)
+        {
+            value.apiOnline = false;
+            visibleChanged = true;
+        }
     }
 
-    ++value.revision;
+    if (visibleChanged) ++value.revision;
     if (xSemaphoreTake(mutex_, pdMS_TO_TICKS(100)) == pdTRUE)
     {
         snapshot_ = value;
