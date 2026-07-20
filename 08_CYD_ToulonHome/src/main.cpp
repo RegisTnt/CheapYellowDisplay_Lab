@@ -57,6 +57,12 @@ ThemePalette currentPalette = {};
 ThemePalette transitionFrom = {};
 ThemePalette transitionTo = {};
 
+enum class ScreenPage : uint8_t { Home, Weather };
+ScreenPage currentPage = ScreenPage::Home;
+uint32_t lastInteractionMs = 0;
+bool fullRedrawRequired = false;
+constexpr uint32_t WEATHER_TIMEOUT_MS = 20000;
+
 void configureOta()
 {
     if (IS_DEMO || otaStarted) return;
@@ -87,10 +93,23 @@ void drawEverything(
 )
 {
     dashboard.drawHeader(weather, now, theme);
-    dashboard.drawForecast(weather, theme);
     dashboard.drawPortal(portal, animationManager.portalGlow(), theme);
     dashboard.drawControls(portal, animationManager, millis(), theme);
-    dashboard.drawFooter(moonSnapshot, wifi, portal, weather, now, theme);
+    dashboard.drawFooter(wifi, portal, weather, now, theme);
+}
+
+void drawCurrentPage(
+    const WeatherSnapshot& weather,
+    const PortalSnapshot& portal,
+    const WifiSnapshot& wifi,
+    time_t now,
+    const ThemePalette& theme
+)
+{
+    if (currentPage == ScreenPage::Weather)
+        dashboard.drawWeatherDetails(weather, moonSnapshot, now, theme);
+    else
+        drawEverything(weather, portal, wifi, now, theme);
 }
 
 bool buttonStillContains(AnimationManager::Button button, int16_t x, int16_t y)
@@ -105,6 +124,22 @@ bool buttonStillContains(AnimationManager::Button button, int16_t x, int16_t y)
 void handleTouch(const TouchEvent& event, uint32_t nowMs)
 {
     if (event.type == TouchEventType::None) return;
+
+    if (event.type == TouchEventType::Down)
+    {
+        lastInteractionMs = nowMs;
+        if (currentPage == ScreenPage::Weather) return;
+        if (DashboardScreen::inWeatherBand(event.x, event.y))
+        {
+            currentPage = ScreenPage::Weather;
+            capturedButton = AnimationManager::Button::None;
+            animationManager.release();
+            fullRedrawRequired = true;
+            return;
+        }
+    }
+
+    if (currentPage == ScreenPage::Weather) return;
 
     if (event.type == TouchEventType::Down)
     {
@@ -169,7 +204,7 @@ void setup()
     const WifiSnapshot wifi = wifiManager.snapshot();
     const DayPhase phase = dashboard.dayPhase(weather, now);
     currentPalette = dashboard.paletteFor(phase);
-    drawEverything(weather, portal, wifi, now, currentPalette);
+    drawCurrentPage(weather, portal, wifi, now, currentPalette);
 
     lastWeatherRevision = weather.revision;
     lastPortalRevision = portal.revision;
@@ -207,6 +242,13 @@ void loop()
     PortalSnapshot portal = portalClient.snapshot();
     refreshMoon(now);
 
+    if (currentPage == ScreenPage::Weather
+        && nowMs - lastInteractionMs >= WEATHER_TIMEOUT_MS)
+    {
+        currentPage = ScreenPage::Home;
+        fullRedrawRequired = true;
+    }
+
     const bool portalAlert = portal.position == PortalPosition::Open
         && portal.openSinceMs != 0
         && nowMs - portal.openSinceMs >= 30000;
@@ -236,7 +278,7 @@ void loop()
         currentPalette = dashboard.blendPalette(transitionFrom, transitionTo, progress);
         if (lastThemeFrameMs == 0 || nowMs - lastThemeFrameMs >= 100 || progress == 255)
         {
-            drawEverything(weather, portal, wifi, now, currentPalette);
+            drawCurrentPage(weather, portal, wifi, now, currentPalette);
             lastThemeFrameMs = nowMs;
         }
         lastWeatherRevision = weather.revision;
@@ -249,29 +291,54 @@ void loop()
 
     const ThemePalette& theme = currentPalette;
 
+    if (fullRedrawRequired)
+    {
+        drawCurrentPage(weather, portal, wifi, now, theme);
+        lastWeatherRevision = weather.revision;
+        lastPortalRevision = portal.revision;
+        lastWifiRevision = wifi.revision;
+        lastHeaderSecond = now;
+        fullRedrawRequired = false;
+        return;
+    }
+
+    if (currentPage == ScreenPage::Weather)
+    {
+        if (secondChanged || now != lastHeaderSecond || weather.revision != lastWeatherRevision)
+        {
+            dashboard.drawWeatherDetails(weather, moonSnapshot, now, theme);
+            lastHeaderSecond = now;
+            lastWeatherRevision = weather.revision;
+        }
+        lastPortalRevision = portal.revision;
+        lastWifiRevision = wifi.revision;
+        yield();
+        return;
+    }
+
+    const bool weatherChanged = weather.revision != lastWeatherRevision;
+    const bool portalChanged = portal.revision != lastPortalRevision;
+    const bool wifiChanged = wifi.revision != lastWifiRevision;
+
     if (secondChanged || now != lastHeaderSecond)
     {
         dashboard.drawHeader(weather, now, theme);
         lastHeaderSecond = now;
     }
-    if (weather.revision != lastWeatherRevision)
+    if (weatherChanged)
     {
         dashboard.drawHeader(weather, now, theme);
-        dashboard.drawForecast(weather, theme);
         lastWeatherRevision = weather.revision;
     }
-    if (portal.revision != lastPortalRevision || animationChanged)
+    if (portalChanged || animationChanged)
     {
         dashboard.drawPortal(portal, animationManager.portalGlow(), theme);
         dashboard.drawControls(portal, animationManager, nowMs, theme);
         lastPortalRevision = portal.revision;
     }
-    if (wifi.revision != lastWifiRevision
-        || portal.revision != lastPortalRevision
-        || weather.revision != lastWeatherRevision
-        || secondChanged)
+    if (wifiChanged || portalChanged || weatherChanged || secondChanged)
     {
-        dashboard.drawFooter(moonSnapshot, wifi, portal, weather, now, theme);
+        dashboard.drawFooter(wifi, portal, weather, now, theme);
         lastWifiRevision = wifi.revision;
     }
     yield();

@@ -1,6 +1,6 @@
 # 08 — CYD Toulon Home
 
-Tableau de bord mural autonome pour le **Cheap Yellow Display ESP32-2432S028R** en orientation paysage 320 × 240. Une seule page réunit la météo de Toulon, l'heure, la Lune, l'état binaire du portail et deux commandes tactiles.
+Tableau de bord mural autonome pour le **Cheap Yellow Display ESP32-2432S028R** en orientation paysage 320 × 240. L'accueil privilégie l'état du portail et les deux commandes tactiles ; la météo détaillée est isolée dans une seconde vue.
 
 ![Rendu du tableau de bord](docs/dashboard-preview.svg)
 
@@ -12,7 +12,7 @@ Tableau de bord mural autonome pour le **Cheap Yellow Display ESP32-2432S028R** 
 - aucune commande physique n'est rejouée, mise en file ou retentée automatiquement ;
 - la météo et le portail travaillent sur le cœur réseau, hors de la boucle graphique ;
 - la boucle principale ne contient aucun `delay()` ;
-- un seul sprite TFT_eSPI 16 bits de 320 × 64 est réutilisé pour toutes les zones.
+- un seul sprite TFT_eSPI 16 bits de 320 × 96 est réutilisé pour toutes les zones.
 
 ## Architecture
 
@@ -39,19 +39,21 @@ AnimationManager ┘          │
 | `MoonCalculator` | Phase et illumination calculées localement |
 | `TouchManager` | Lecture calibrée du XPT2046 et événements tactiles |
 | `AnimationManager` | Enfoncement des boutons, retour visuel et respiration du voyant |
-| `DashboardScreen` | Rendu partiel des cinq bandes de l'écran avec un sprite partagé |
+| `DashboardScreen` | Rendu partiel des vues accueil et météo avec un sprite partagé |
 
 ## Interface 320 × 240
 
 ```text
-┌ TOULON ─ météo actuelle ───────────── heure ┐ 54 px
-├ CETTE NUIT ┬ DEMAIN ┬ SOLEIL ───────────────┤ 55 px
-├ ● PORTAIL FERMÉ / OUVERT ───────────────────┤ 40 px
-├ PIÉTON ─────────────┬ VOITURE ───────────────┤ 53 px
-└ LUNE ───── WiFi ● ─ API ● ─ MAJ ────────────┘ 38 px
+┌ météo actuelle ───────────────────── heure ┐ 42 px
+├  ●●  PORTAIL                              ┤
+│  ●●  FERMÉ / OUVERT                       │ 92 px
+├ PIÉTON ─────────────┬ VOITURE ─────────────┤ 73 px
+└ WiFi ● ─ API ● ─────────────── MAJ 14:08 ┘ 33 px
 ```
 
-Le thème change automatiquement selon le lever et le coucher du Soleil : jour bleu méditerranéen, crépuscule orangé et nuit bleu profond. Le voyant rouge respire uniquement après trente secondes d'ouverture. Les textes restent fixes.
+Le fond noir, les aplats saturés, les traits épais et les gros caractères restent lisibles sur le TFT à contraste limité. Le voyant rouge respire uniquement après trente secondes d'ouverture. Le texte reste fixe.
+
+Toucher la bande météo ouvre une vue dédiée avec les conditions actuelles, cette nuit, demain, les heures de lever et coucher du Soleil et la phase de la Lune. Après 20 secondes sans interaction, l'accueil revient automatiquement.
 
 ## API PortailControl
 
@@ -71,10 +73,11 @@ Les commandes sont désactivées pendant l'envoi, pendant trois secondes après 
 
 Open-Meteo est interrogé pour Toulon (`43.1242`, `5.9280`, fuseau `Europe/Paris`) toutes les quinze minutes. Le tableau affiche :
 
-- température, ressenti, description et icône actuels ;
+- température, description et icône actuels ;
 - température représentative, ciel et pluie de 22 h à 6 h ;
 - minimum, maximum, ciel et pluie du lendemain ;
-- lever et coucher du Soleil.
+- lever et coucher du Soleil ;
+- phase et illumination de la Lune, calculées localement.
 
 Après un échec, une tentative de lecture météo est refaite une minute plus tard. La dernière valeur valide reste affichée avec l'indicateur `ANCIENNE`. La connexion HTTPS est chiffrée mais utilise actuellement `setInsecure()`.
 

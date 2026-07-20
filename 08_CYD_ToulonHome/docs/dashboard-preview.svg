@@ -1,58 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="720" viewBox="0 0 320 240">
-  <defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#07528d"/><stop offset="1" stop-color="#0c8eb4"/>
-    </linearGradient>
-    <linearGradient id="sea" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#007d9d"/><stop offset="1" stop-color="#00476d"/>
-    </linearGradient>
-    <filter id="shadow"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity=".28"/></filter>
-  </defs>
-  <rect width="320" height="240" rx="8" fill="#043f61"/>
-  <rect width="320" height="54" fill="url(#sky)"/>
-  <text x="10" y="17" font-family="Arial" font-size="9" font-weight="700" fill="#fff">● TOULON</text>
-  <g transform="translate(91 25)" stroke="#ffd12b" stroke-width="2"><circle r="8" fill="#ffc400"/><path d="M0-14v4M0 10v4M-14 0h4M10 0h4M-10-10l3 3M7 7l3 3M10-10L7-7M-7 7l-3 3"/></g>
-  <text x="111" y="31" font-family="Arial" font-size="22" font-weight="700" fill="#fff">28.4°C</text>
-  <text x="10" y="44" font-family="Arial" font-size="7" fill="#fff">Ciel dégagé</text>
-  <text x="188" y="44" text-anchor="end" font-family="Arial" font-size="5" fill="#d8f1fb">Ressenti 31°C</text>
-  <text x="311" y="22" text-anchor="end" font-family="Arial" font-size="17" font-weight="700" fill="#fff">14:23</text>
-  <text x="311" y="38" text-anchor="end" font-family="Arial" font-size="6" fill="#d8f1fb">19/07</text>
-
-  <rect y="54" width="320" height="55" fill="url(#sea)"/>
-  <g font-family="Arial" filter="url(#shadow)">
-    <rect x="3" y="56" width="102" height="51" rx="9" fill="#e9f2df" stroke="#ffd12b"/>
-    <text x="54" y="67" text-anchor="middle" font-size="6" font-weight="700" fill="#00768e">CETTE NUIT</text>
-    <text x="13" y="88" font-size="16" fill="#07304c">☾</text><text x="34" y="85" font-size="11" font-weight="700" fill="#07304c">22°C</text>
-    <text x="34" y="98" font-size="5" fill="#345264">Pluie 10%</text>
-    <rect x="109" y="56" width="102" height="51" rx="9" fill="#e9f2df" stroke="#ffd12b"/>
-    <text x="160" y="67" text-anchor="middle" font-size="6" font-weight="700" fill="#00768e">DEMAIN</text>
-    <text x="119" y="87" font-size="13">☀</text><text x="139" y="85" font-size="10" font-weight="700" fill="#07304c">31/22°C</text>
-    <text x="139" y="98" font-size="5" fill="#345264">Pluie 5%</text>
-    <rect x="215" y="56" width="102" height="51" rx="9" fill="#fff0cf" stroke="#ffd12b"/>
-    <text x="266" y="67" text-anchor="middle" font-size="6" font-weight="700" fill="#c26c00">SOLEIL</text>
-    <text x="226" y="83" font-size="11">◒</text><text x="244" y="82" font-size="6" fill="#07304c">L 06:09</text>
-    <text x="244" y="97" font-size="6" fill="#07304c">C 21:08</text>
+  <rect width="320" height="240" rx="6" fill="#000"/>
+  <rect width="320" height="42" fill="#08202b"/>
+  <path d="M0 40h320" stroke="#0099ff" stroke-width="2"/>
+  <g transform="translate(22 20)" stroke="#ffe600" stroke-width="2.5">
+    <circle r="8" fill="#ffe600"/><path d="M0-14v4M0 10v4M-14 0h4M10 0h4M-10-10l3 3M7 7l3 3M10-10l-3 3M-7 7l-3 3"/>
   </g>
-
-  <rect y="109" width="320" height="40" fill="#006c89"/>
-  <rect x="4" y="110" width="312" height="38" rx="10" fill="#073e59" stroke="#2bd1ca" filter="url(#shadow)"/>
-  <circle cx="29" cy="129" r="13" fill="#003e24"/><circle cx="29" cy="129" r="9" fill="#16c95d"/>
-  <text x="51" y="135" font-family="Arial" font-size="15" font-weight="700" fill="#16c95d">PORTAIL FERMÉ</text>
-  <text x="307" y="132" text-anchor="end" font-family="Arial" font-size="5" fill="#b9d0da">CAPTEUR</text>
-
-  <rect y="149" width="320" height="53" fill="#006c89"/>
-  <rect x="4" y="153" width="153" height="46" rx="11" fill="#fbc21d" stroke="#fff" filter="url(#shadow)"/>
-  <text x="32" y="183" text-anchor="middle" font-family="Arial" font-size="22" fill="#07304c">♟</text>
-  <text x="101" y="182" text-anchor="middle" font-family="Arial" font-size="13" font-weight="700" fill="#07304c">PIÉTON</text>
-  <rect x="163" y="153" width="153" height="46" rx="11" fill="#08aab5" stroke="#fff" filter="url(#shadow)"/>
-  <text x="190" y="182" text-anchor="middle" font-family="Arial" font-size="19" fill="#07304c">▱</text>
-  <text x="265" y="182" text-anchor="middle" font-family="Arial" font-size="13" font-weight="700" fill="#07304c">VOITURE</text>
-
-  <rect y="202" width="320" height="38" fill="#062f49"/><line x1="0" y1="202" x2="320" y2="202" stroke="#2bd1ca"/>
-  <circle cx="17" cy="221" r="11" fill="#f4e3aa"/><circle cx="12" cy="218" r="11" fill="#062f49"/>
-  <text x="33" y="215" font-family="Arial" font-size="5" fill="#fff">LUNE</text>
-  <text x="33" y="228" font-family="Arial" font-size="5" fill="#fff">Premier quartier 47%</text>
-  <circle cx="175" cy="212" r="4" fill="#16c95d"/><text x="184" y="215" font-family="Arial" font-size="5" fill="#c8dbe4">WiFi</text>
-  <circle cx="228" cy="212" r="4" fill="#16c95d"/><text x="237" y="215" font-family="Arial" font-size="5" fill="#c8dbe4">API</text>
-  <text x="315" y="228" text-anchor="end" font-family="Arial" font-size="5" fill="#c8dbe4">MAJ 14:08</text>
+  <g font-family="Arial,sans-serif" font-weight="700">
+    <text x="45" y="29" font-size="24" fill="#fff">29 C</text>
+    <text x="310" y="29" text-anchor="end" font-size="24" fill="#fff">23:40</text>
+    <circle cx="48" cy="88" r="36" fill="#003d16"/>
+    <circle cx="48" cy="88" r="29" fill="#00dd45" stroke="#fff" stroke-width="2"/>
+    <text x="94" y="82" font-size="25" fill="#fff">PORTAIL</text>
+    <text x="94" y="113" font-size="25" fill="#00e547">FERMÉ</text>
+    <rect x="3" y="138" width="155" height="64" rx="8" fill="#ffe100" stroke="#fff" stroke-width="2"/>
+    <circle cx="28" cy="158" r="7" fill="#000"/><path d="M28 166v15m0-10-11 8m11-8 11 8m-11 1-9 15m9-15 9 15" stroke="#000" stroke-width="5" stroke-linecap="round"/>
+    <text x="103" y="178" text-anchor="middle" font-size="22" fill="#000">PIÉTON</text>
+    <rect x="162" y="138" width="155" height="64" rx="8" fill="#0099ff" stroke="#fff" stroke-width="2"/>
+    <path d="M174 170h33v17h-33zM180 170l6-10h12l7 10" fill="#000"/><circle cx="181" cy="188" r="5"/><circle cx="201" cy="188" r="5"/>
+    <text x="267" y="178" text-anchor="middle" font-size="20" fill="#000">VOITURE</text>
+  </g>
+  <rect y="207" width="320" height="33" fill="#08202b"/>
+  <path d="M0 208h320" stroke="#0099ff" stroke-width="2"/>
+  <g font-family="Arial,sans-serif" font-weight="700" font-size="12" fill="#fff">
+    <circle cx="13" cy="224" r="6" fill="#00dd45"/><text x="23" y="228">WiFi</text>
+    <circle cx="91" cy="224" r="6" fill="#00dd45"/><text x="101" y="228">API</text>
+    <text x="310" y="228" text-anchor="end">MAJ 23:39</text>
+  </g>
 </svg>

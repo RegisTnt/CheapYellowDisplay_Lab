@@ -47,7 +47,7 @@ bool AnimationManager::update(uint32_t nowMs, bool portalAlertActive)
 
     if (portalAlertActive)
     {
-        const float wave = (sinf(static_cast<float>(nowMs) * 0.004F) + 1.0F) * 0.5F;
+        const float wave = (sinf(static_cast<float>(nowMs) * 0.002F) + 1.0F) * 0.5F;
         portalGlow_ = static_cast<uint8_t>(90 + wave * 165);
     }
     else
