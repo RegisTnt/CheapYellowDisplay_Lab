@@ -61,7 +61,34 @@ enum class ScreenPage : uint8_t { Home, Weather };
 ScreenPage currentPage = ScreenPage::Home;
 uint32_t lastInteractionMs = 0;
 bool fullRedrawRequired = false;
+bool screenSleeping = false;
 constexpr uint32_t WEATHER_TIMEOUT_MS = 20000;
+constexpr uint32_t SCREEN_SLEEP_TIMEOUT_MS = 60000;
+
+void setBacklight(bool enabled)
+{
+    digitalWrite(TFT_BL, enabled ? TFT_BACKLIGHT_ON : !TFT_BACKLIGHT_ON);
+}
+
+void wakeScreen(uint32_t nowMs, bool userInitiated)
+{
+    if (!screenSleeping) return;
+    screenSleeping = false;
+    setBacklight(true);
+    if (userInitiated) lastInteractionMs = nowMs;
+    fullRedrawRequired = true;
+    Serial.println(userInitiated ? "Ecran reveille par toucher." : "Ecran reveille par etat portail.");
+}
+
+void sleepScreen()
+{
+    if (screenSleeping) return;
+    capturedButton = AnimationManager::Button::None;
+    animationManager.release();
+    screenSleeping = true;
+    setBacklight(false);
+    Serial.println("Ecran en veille: portail ferme confirme.");
+}
 
 void configureOta()
 {
@@ -127,6 +154,13 @@ void handleTouch(const TouchEvent& event, uint32_t nowMs)
 
     if (event.type == TouchEventType::Down)
     {
+        if (screenSleeping)
+        {
+            wakeScreen(nowMs, true);
+            capturedButton = AnimationManager::Button::None;
+            animationManager.release();
+            return; // Le toucher de réveil est toujours consommé.
+        }
         lastInteractionMs = nowMs;
         if (currentPage == ScreenPage::Weather) return;
         if (DashboardScreen::inWeatherBand(event.x, event.y))
@@ -241,6 +275,28 @@ void loop()
     WeatherSnapshot weather = weatherManager.snapshot();
     PortalSnapshot portal = portalClient.snapshot();
     refreshMoon(now);
+
+    const bool portalClosedConfirmed = portal.apiOnline
+        && portal.position == PortalPosition::Closed;
+    if (screenSleeping)
+    {
+        if (!portalClosedConfirmed)
+            wakeScreen(nowMs, false);
+        else
+        {
+            yield();
+            return;
+        }
+    }
+
+    if (currentPage == ScreenPage::Home
+        && portalClosedConfirmed
+        && nowMs - lastInteractionMs >= SCREEN_SLEEP_TIMEOUT_MS)
+    {
+        sleepScreen();
+        yield();
+        return;
+    }
 
     if (currentPage == ScreenPage::Weather
         && nowMs - lastInteractionMs >= WEATHER_TIMEOUT_MS)

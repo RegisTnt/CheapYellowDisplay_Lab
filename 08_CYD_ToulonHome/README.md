@@ -55,6 +55,8 @@ Le fond noir, les aplats saturés, les traits épais et les gros caractères res
 
 Toucher la bande météo ouvre une vue dédiée avec les conditions actuelles, cette nuit, demain, les heures de lever et coucher du Soleil et la phase de la Lune. Après 20 secondes sans interaction, l'accueil revient automatiquement.
 
+Après 60 secondes sans interaction, le rétroéclairage s'éteint uniquement si l'API confirme que le portail est fermé. Le premier toucher rallume seulement l'écran et ne déclenche aucune commande. Une ouverture du portail, un état inconnu ou une perte de l'API provoque également un réveil automatique.
+
 ## API PortailControl
 
 Adresse par défaut : `http://portail.local`.
